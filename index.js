@@ -1,6 +1,7 @@
 const express = require('express')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors')
+const { v4: uuidv4 } = require('uuid'); 
 const app = express()
 require('dotenv').config()
 const port = process.env.PORT || 3000;
@@ -28,7 +29,7 @@ async function run() {
     const userCollection = db.collection('users')
     const propertyCollection = db.collection('property')
 
-    // Property API
+    // MyProperty Data
     app.post("/myproperties", async (req, res) => {
         const myProperty = req.body;
         const result = await propertyCollection.insertOne(myProperty);
@@ -141,6 +142,7 @@ async function run() {
 
     app.post("/homes", async (req, res) => {
         const newHome = req.body;
+        newHome._id = uuidv4();
         const result = await homeCollection.insertOne(newHome);
         res.send(result);
     })
