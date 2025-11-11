@@ -26,6 +26,20 @@ async function run() {
     const db = client.db('homenest_db');
     const homeCollection = db.collection('homes')
     const userCollection = db.collection('users')
+    const propertyCollection = db.collection('property')
+
+    // Property API
+    app.post("/myproperties", async (req, res) => {
+        const myProperty = req.body;
+        const result = await propertyCollection.insertOne(myProperty);
+        res.send(result);
+    });
+    app.get("/myproperties", async (req, res) => {
+        const email = req.query.email;
+        const query = email ? { buyer_email: email } : {};
+        const result = await propertyCollection.find(query).toArray();
+        res.send(result);
+    });
 
     // Users data
     app.post("/users", async (req, res) => {
