@@ -40,6 +40,45 @@ async function run() {
         const result = await propertyCollection.find(query).toArray();
         res.send(result);
     });
+    app.get("/myproperties", async (req, res) => {
+        const email = req.query.email;
+        if (!email) {
+            return res.status(400).send({ message: "Email is required" });
+        }
+
+        const result = await propertyCollection.find({ buyer_email: email }).toArray();
+        res.send(result);
+    });
+    app.get("/myproperties/:id", async (req, res) => {
+        const id = req.params.id;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).send({ message: "Invalid property ID" });
+        }
+
+        const property = await propertyCollection.findOne({ _id: new ObjectId(id) });
+
+        if (!property) {
+            return res.status(404).send({ message: "Property not found" });
+        }
+
+        res.send(property);
+    });
+    app.delete("/myproperties/:id", async (req, res) => {
+        const id = req.params.id;
+        const result = await propertyCollection.deleteOne({ _id: new ObjectId(id) });
+        res.send(result);
+    });
+
+    app.put("/myproperties/:id", async (req, res) => {
+        const id = req.params.id;
+        const updatedData = req.body;
+        const result = await propertyCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: updatedData }
+        );
+        res.send(result);
+    });
 
     // Users data
     app.post("/users", async (req, res) => {
