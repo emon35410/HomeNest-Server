@@ -1,6 +1,7 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
+import { v4 as uuidv4 } from 'uuid';
 const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
 
@@ -161,7 +162,7 @@ async function run() {
         res.send(result);
     });
 
-    console.log("MongoDB connected successfully!");
+    // console.log("MongoDB connected successfully!");
 }
 
 run().catch(console.dir);
