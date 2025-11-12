@@ -1,7 +1,7 @@
 const express = require('express')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors')
-const { v4: uuidv4 } = require('uuid'); 
+const { v4: uuidv4 } = require('uuid');
 const app = express()
 require('dotenv').config()
 const port = process.env.PORT || 3000;
@@ -28,7 +28,22 @@ async function run() {
     const homeCollection = db.collection('homes')
     const userCollection = db.collection('users')
     const propertyCollection = db.collection('property')
+    const reviewsCollection = db.collection("reviews");
 
+
+    // revies data
+    app.post("/reviews", async (req, res) => {
+        const review = req.body;
+        const result = await reviewsCollection.insertOne(review);
+        res.send(result);
+    });
+    app.get("/reviews", async (req, res) => {
+        const reviews = await reviewsCollection.find().sort({ date: -1 }).toArray();
+        res.send(reviews);
+    });
+
+
+   
     // MyProperty Data
     app.post("/myproperties", async (req, res) => {
         const myProperty = req.body;
