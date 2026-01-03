@@ -22,6 +22,19 @@ const client = new MongoClient(uri, {
 app.use(cors());
 app.use(express.json());
 
+const buildIdQuery = (id) => {
+  if (ObjectId.isValid(id)) {
+    return {
+      $or: [
+        { _id: new ObjectId(id) },
+        { _id: id }
+      ]
+    };
+  }
+  return { _id: id };
+};
+
+
 app.get("/", (req, res) => {
   res.send("✅ HomeNest Server is Running Successfully!");
 });
@@ -111,6 +124,18 @@ async function run() {
       const users = await userCollection.find().toArray();
       res.send(users);
     });
+    
+    app.patch("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const updatedData = req.body;
+
+      const result = await userCollection.updateOne(
+        { email },
+        { $set: updatedData }
+      );
+
+      res.send(result);
+    });
 
     // ----------------  Homes ----------------
     app.get("/homes", async (req, res) => {
@@ -127,12 +152,16 @@ async function run() {
 
     app.get("/homes/:id", async (req, res) => {
       const id = req.params.id;
-      const home = await homeCollection.findOne({
-        _id: ObjectId.isValid(id) ? new ObjectId(id) : id,
-      });
-      if (!home) return res.status(404).send({ message: "Home not found" });
+
+      const home = await homeCollection.findOne(buildIdQuery(id));
+
+      if (!home) {
+        return res.status(404).send({ message: "Home not found" });
+      }
+
       res.send(home);
     });
+
 
     app.post("/homes", async (req, res) => {
       const newHome = req.body;
@@ -144,18 +173,24 @@ async function run() {
     app.patch("/homes/:id", async (req, res) => {
       const id = req.params.id;
       const updateHome = req.body;
+
       const result = await homeCollection.updateOne(
-        { _id: new ObjectId(id) },
+        buildIdQuery(id),
         { $set: updateHome }
       );
+
       res.send(result);
     });
 
+
     app.delete("/homes/:id", async (req, res) => {
       const id = req.params.id;
-      const result = await homeCollection.deleteOne({ _id: new ObjectId(id) });
+
+      const result = await homeCollection.deleteOne(buildIdQuery(id));
+
       res.send(result);
     });
+
 
     console.log("✅ All routes are live!");
   } catch (error) {
